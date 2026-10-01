@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="sr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Nginx u Dockeru</title>
+    <style>
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      body {
+        font-family: system-ui, sans-serif;
+        background: #0f2a3d;
+        color: #e8f1f7;
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 24px;
+      }
+      main {
+        background: #163a54;
+        border-left: 6px solid #2496ed;
+        border-radius: 8px;
+        padding: 40px;
+        max-width: 560px;
+        width: 100%;
+      }
+      h1 {
+        font-size: 2rem;
+        margin-bottom: 8px;
+      }
+      p {
+        color: #b8cfdf;
+        line-height: 1.6;
+        margin-bottom: 24px;
+      }
+      ul {
+        list-style: none;
+      }
+      li {
+        display: flex;
+        justify-content: space-between;
+        padding: 10px 0;
+        border-bottom: 1px solid #24506f;
+      }
+      li span:last-child {
+        color: #7cc4ff;
+        font-weight: 600;
+      }
+      button {
+        margin-top: 24px;
+        background: #2496ed;
+        color: white;
+        border: none;
+        padding: 10px 18px;
+        border-radius: 6px;
+        font-size: 1rem;
+        cursor: pointer;
+      }
+      button:hover {
+        background: #1d7fca;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Hello World</h1>
+      <p>Statička stranica koju servira nginx iz zvanične Docker slike.</p>
+      <ul>
+        <li><span>Web server</span><span>nginx</span></li>
+        <li><span>Adresa</span><span id="host"></span></li>
+        <li><span>Vreme učitavanja</span><span id="time"></span></li>
+        <li><span>Broj klikova</span><span id="count">0</span></li>
+      </ul>
+      <button id="btn">Klikni me</button>
+    </main>
+
+    <script>
+      document.getElementById("host").textContent = window.location.host;
+      document.getElementById("time").textContent =
+        new Date().toLocaleTimeString("sr-RS");
+
+      let count = 0;
+      document.getElementById("btn").addEventListener("click", function () {
+        count++;
+        document.getElementById("count").textContent = count;
+      });
+    </script>
+  </body>
+</html>
