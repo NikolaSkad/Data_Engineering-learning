@@ -1,0 +1,8 @@
+FROM eclipse-temurin:8-jre
+
+WORKDIR /app
+
+EXPOSE 8080
+
+# jar se čita iz deljenog volume-a
+CMD ["java", "-jar", "/output/app.jar"]

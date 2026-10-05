@@ -1,0 +1,9 @@
+FROM maven:3.9-eclipse-temurin-8
+
+WORKDIR /app
+
+COPY pom.xml .
+COPY src ./src
+
+# build se radi pri pokretanju kontejnera, jar ide u /output (volume)
+CMD ["sh", "-c", "mvn clean package -DskipTests && cp target/demo-0.0.1-SNAPSHOT.jar /output/app.jar"]
