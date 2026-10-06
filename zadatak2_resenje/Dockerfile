@@ -14,7 +14,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 EXPOSE 80
 
 # Definišemo environment variable
-ENV PERSON Covece
+ENV PERSON="Covece e"
 
 # Definišemo komandu koja će se izvršiti kada se container pokrene
 CMD ["python", "app.py"]
