@@ -22,5 +22,5 @@ docker run --rm --name zad04-build-kontejner -v zad04-jar-volume:/output zad04-b
 
 # Run kontejner kaci isti volumen na /output i pokrece /output/app.jar
 # -p 8080:8080 jer Spring Boot u kontejneru slusa na 8080 (sa 8080:80 stranica je prazna)
-# :ro jer run kontejner .jar samo cita
+# :ro (read-only) jer run kontejner .jar samo cita
 docker run -d --name zad04-run-kontejner -p 8080:8080 -v zad04-jar-volume:/output:ro zad04-run-img

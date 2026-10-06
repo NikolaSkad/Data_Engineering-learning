@@ -1,0 +1,27 @@
+# Python (vote) - kompajlirani fajlovi, Python ih pravi sam pri pokretanju
+*.pyc
+__pycache__/
+
+# Node.js (result) - paketi se instaliraju iz package.json
+node_modules/
+npm-debug.log*
+
+# .NET (worker) - build izlaz
+bin/
+obj/
+
+# Java (worker, Dockerfile.j) - Maven build izlaz
+target/
+
+# IDE fajlovi
+.vscode/
+.idea/
+.settings/
+.classpath
+.project
+*.iml
+
+# macOS
+.DS_Store
+
+PLAN.md
