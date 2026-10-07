@@ -1,0 +1,25 @@
+services:
+  app:
+    build: .
+    ports:
+      - 8080:80
+    depends_on:
+      - redis
+    env_file: .env
+    networks:
+      - webnet
+
+  redis:
+    image: redis:8.10.2
+    ports:
+      - 6379:6379
+    networks:
+      - webnet
+    volumes:
+      - redis_data:/data
+
+volumes:
+  redis_data:
+
+networks:
+  webnet:
