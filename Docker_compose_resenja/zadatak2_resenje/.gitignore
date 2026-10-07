@@ -1,0 +1,12 @@
+# tajne
+.env
+
+# macOS
+.DS_Store
+
+# Python
+*.pyc
+__pycache__/
+
+# Node.js
+node_modules/
