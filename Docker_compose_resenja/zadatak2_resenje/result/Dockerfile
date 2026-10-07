@@ -1,5 +1,8 @@
 FROM node:8.9-alpine
 
+# npm 5 u Docker-u puca sa "could not get uid/gid" bez ovoga
+RUN npm config set unsafe-perm true
+
 RUN mkdir -p /app
 WORKDIR /app
 
@@ -12,7 +15,7 @@ RUN npm install \
  && mv /app/node_modules /node_modules
 COPY . /app
 
-ENV PORT 80
+ENV PORT=80
 EXPOSE 80
 
 CMD ["node", "server.js"]
