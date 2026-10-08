@@ -1,0 +1,21 @@
+# tajne (lozinka za MySQL)
+.env
+
+# macOS
+.DS_Store
+
+# Angular (Front-End) - paketi i build izlaz
+node_modules/
+dist/
+npm-debug.log*
+
+# Java / Maven (Back-End) - build izlaz
+target/
+
+# IDE fajlovi
+.vscode/
+.idea/
+.settings/
+.classpath
+.project
+*.iml
