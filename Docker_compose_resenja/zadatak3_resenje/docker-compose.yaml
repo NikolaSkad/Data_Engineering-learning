@@ -1,0 +1,33 @@
+services:
+  db:
+    image: mysql:5.7
+    platform: linux/amd64
+    networks:
+      - back_tier
+    volumes:
+      - db_data:/var/lib/mysql
+    env_file: .env
+
+  backend:
+    build: ./Back-End/java/web-shop
+    ports:
+      - 8080:8080
+    env_file: .env
+    networks:
+      - back_tier
+    depends_on:
+      - db
+    restart: on-failure
+
+  frontend:
+    build: ./Front-End/angular-zadaci
+    ports:
+      - 4200:80
+    depends_on:
+      - backend
+
+networks:
+  back_tier:
+
+volumes:
+  db_data:
