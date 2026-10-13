@@ -75,3 +75,50 @@ INSERT OVERWRITE DIRECTORY '/user/emp_stariji' ROW FORMAT DELIMITED FIELDS TERMI
 !quit
 hdfs dfs -ls /user/emp_stariji
 hdfs dfs -cat /user/emp_stariji/*
+
+
+# ===== Hive - Zadatak 2 =====
+
+# --- Mac terminal (folder docker-hive) ---
+
+# 1. Preuzeti CSV fajl (-L prati redirect, -o ime fajla)
+curl -L -o zipcodes.csv https://raw.githubusercontent.com/spark-examples/spark-scala-examples/master/src/main/resources/free-zipcode-database.csv
+# prebaciti fajl sa Mac-a u hive-server kontejner (hdfs komanda radi samo u kontejneru)
+docker cp zipcodes.csv hive-server:/opt/zipcodes.csv
+
+# --- bash u hive-server kontejneru (docker exec -it hive-server bash) ---
+
+cd /opt
+ls -lh zipcodes.csv
+head -3 zipcodes.csv
+
+# 2. Kopirati fajl na HDFS
+hdfs dfs -mkdir -p /user/zipcode
+hdfs dfs -put -f zipcodes.csv /user/zipcode
+hdfs dfs -ls -h /user/zipcode
+
+# --- beeline (beeline -u jdbc:hive2://localhost:10000) ---
+
+# 3. Kreirati tabelu Zipcode
+# OpenCSVSerde: skida navodnike i ne seče vrednosti sa zarezom ("Parc Parque, PR"); sve kolone čita kao STRING
+# skip.header.line.count: preskače prvi red sa nazivima kolona
+CREATE TABLE Zipcode (
+  RecordNumber STRING, Zipcode STRING, ZipCodeType STRING, City STRING,
+  State STRING, LocationType STRING, Lat STRING, Long STRING,
+  Xaxis STRING, Yaxis STRING, Zaxis STRING, WorldRegion STRING,
+  Country STRING, LocationText STRING, Location STRING, Decommisioned STRING,
+  TaxReturnsFiled STRING, EstimatedPopulation STRING, TotalWages STRING, Notes STRING
+)
+ROW FORMAT SERDE 'org.apache.hadoop.hive.serde2.OpenCSVSerde'
+TBLPROPERTIES ('skip.header.line.count'='1');
+
+# 4. Učitati podatke iz datoteke u tabelu (fajl se premešta iz /user/zipcode u tabelu)
+LOAD DATA INPATH '/user/zipcode/zipcodes.csv' INTO TABLE Zipcode;
+SELECT * FROM Zipcode LIMIT 5;
+SELECT count(*) FROM Zipcode;   -- 81831
+
+# 5. Prikazati sve podatke za kodove sa Floride
+# TODO
+
+# 6. Rezultate smestiti u novu tabelu ZipcodeFL (CTAS)
+# TODO
