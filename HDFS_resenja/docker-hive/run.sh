@@ -1,6 +1,7 @@
 # when the docker is up then docker
 # not run the whole script paste in terminal line by line
 # cus this docker exec -it hive-server bash can't continiue runing script, so lines under wouldn't execute
+# ===== Hive - Primer 1 =====
 # Zakačiti se na hive-server docker kontejner
 docker exec -it hive-server bash
 # Pokrenuti hive klijent - beeline
