@@ -1,8 +1,7 @@
-version: "3"
-
 services:
   namenode:
     image: bde2020/hadoop-namenode:2.0.0-hadoop3.2.1-java8
+    platform: linux/amd64
     container_name: namenode
     volumes:
       - namenode:/hadoop/dfs/name
@@ -16,6 +15,7 @@ services:
 
   datanode1:
     image: bde2020/hadoop-datanode:2.0.0-hadoop3.2.1-java8
+    platform: linux/amd64
     container_name: datanode1
     volumes:
       - datanode1:/hadoop/dfs/data
@@ -26,6 +26,7 @@ services:
 
   datanode2:
     image: bde2020/hadoop-datanode:2.0.0-hadoop3.2.1-java8
+    platform: linux/amd64
     container_name: datanode2
     volumes:
       - datanode2:/hadoop/dfs/data
@@ -36,6 +37,7 @@ services:
 
   datanode3:
     image: bde2020/hadoop-datanode:2.0.0-hadoop3.2.1-java8
+    platform: linux/amd64
     container_name: datanode3
     volumes:
       - datanode3:/hadoop/dfs/data
@@ -46,6 +48,7 @@ services:
 
   hive-server:
     image: bde2020/hive:2.3.2-postgresql-metastore
+    platform: linux/amd64
     container_name: hive-server
     env_file:
       - ./hadoop-hive.env
@@ -57,6 +60,7 @@ services:
   
   hive-metastore:
     image: bde2020/hive:2.3.2-postgresql-metastore
+    platform: linux/amd64
     container_name: hive-metastore
     env_file:
       - ./hadoop-hive.env
@@ -68,10 +72,12 @@ services:
   
   hive-metastore-postgresql:
     image: bde2020/hive-metastore-postgresql:2.3.0
+    platform: linux/amd64
     container_name: hive-metastore-postgresql
 
   cloudera:
     image: gethue/hue:20201111-135001
+    platform: linux/amd64
     container_name: hue
     dns: 8.8.8.8
     ports:
