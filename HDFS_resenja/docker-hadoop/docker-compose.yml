@@ -1,8 +1,7 @@
-version: "3"
-
 services:
   namenode:
     image: bde2020/hadoop-namenode:2.0.0-hadoop3.2.1-java8
+    platform: linux/amd64
     container_name: namenode
     ports:
       - 9870:9870
@@ -16,6 +15,7 @@ services:
 
   datanode1:
     image: bde2020/hadoop-datanode:2.0.0-hadoop3.2.1-java8
+    platform: linux/amd64
     container_name: datanode1
     volumes:
       - hadoop_datanode1:/hadoop/dfs/data
@@ -26,6 +26,7 @@ services:
 
   datanode2:
     image: bde2020/hadoop-datanode:2.0.0-hadoop3.2.1-java8
+    platform: linux/amd64
     container_name: datanode2
     volumes:
       - hadoop_datanode2:/hadoop/dfs/data
@@ -36,6 +37,7 @@ services:
 
   resourcemanager:
     image: bde2020/hadoop-resourcemanager:2.0.0-hadoop3.2.1-java8
+    platform: linux/amd64
     container_name: resourcemanager
     ports:
       - 8088:8088
@@ -46,6 +48,7 @@ services:
 
   nodemanager1:
     image: bde2020/hadoop-nodemanager:2.0.0-hadoop3.2.1-java8
+    platform: linux/amd64
     container_name: nodemanager1
     environment:
       SERVICE_PRECONDITION: "namenode:9870 datanode1:9864 resourcemanager:8088"
@@ -54,6 +57,7 @@ services:
 
   nodemanager2:
     image: bde2020/hadoop-nodemanager:2.0.0-hadoop3.2.1-java8
+    platform: linux/amd64
     container_name: nodemanager2
     environment:
       SERVICE_PRECONDITION: "namenode:9870 datanode2:9864 resourcemanager:8088"
@@ -62,6 +66,7 @@ services:
   
   historyserver:
     image: bde2020/hadoop-historyserver:2.0.0-hadoop3.2.1-java8
+    platform: linux/amd64
     container_name: historyserver
     environment:
       SERVICE_PRECONDITION: "namenode:9870 datanode1:9864 resourcemanager:8088"

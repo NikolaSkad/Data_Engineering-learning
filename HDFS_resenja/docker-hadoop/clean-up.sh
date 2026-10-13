@@ -1,3 +1,3 @@
 #!/bin/bash
-docker rm -f $(docker ps -aq)
-docker volume rm $(docker volume ls -q)
+# gasi samo kontejnere i volume-e ovog projekta (ne dira ostale Docker projekte)
+docker compose -f docker-compose-hue.yml down -v --remove-orphans
