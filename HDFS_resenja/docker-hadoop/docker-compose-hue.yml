@@ -63,7 +63,7 @@ services:
       SERVICE_PRECONDITION: "namenode:9870 datanode2:9864 resourcemanager:8088"
     env_file:
       - ./hadoop.env
-  
+
   historyserver:
     image: bde2020/hadoop-historyserver:2.0.0-hadoop3.2.1-java8
     platform: linux/amd64
@@ -76,7 +76,7 @@ services:
       - ./hadoop.env
 
   cloudera:
-    image: gethue/hue:20201001-135001
+    image: gethue/hue:20201111-135001
     platform: linux/amd64
     hostname: hue
     container_name: hue
@@ -85,9 +85,9 @@ services:
       - "8888:8888"
     volumes:
       - ./conf.dist:/usr/share/hue/desktop/conf
-    depends_on: 
+    depends_on:
       - namenode
-  
+
 volumes:
   hadoop_namenode:
   hadoop_datanode1:
