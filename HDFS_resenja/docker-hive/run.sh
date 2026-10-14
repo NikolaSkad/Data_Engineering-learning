@@ -122,3 +122,42 @@ SELECT count(*) FROM Zipcode;   -- 81831
 
 # 6. Rezultate smestiti u novu tabelu ZipcodeFL (CTAS)
 # TODO
+
+
+# ===== Primer - Movie ratings (MovieLens 100k) =====
+# Python je instaliran kroz Dockerfile (hive-server se pravi sa build: .)
+# Fajlovi u ovom folderu: movies.sql (sve Hive komande), weekday_mapper.py (python skripta)
+
+# --- Mac terminal (folder docker-hive) ---
+
+# (ako je Dockerfile menjan) napraviti image i podići kontejnere
+docker compose up -d --build
+
+# 1. Preuzeti i raspakovati podatke (https + -L, inače se preuzme HTML redirect umesto zip-a)
+curl -L -O https://files.grouplens.org/datasets/movielens/ml-100k.zip
+unzip ml-100k.zip
+
+# 2. Kopirati podatke i skripte u hive-server kontejner
+# (posle svakog ponovnog pravljenja kontejnera ovo mora ponovo)
+docker cp ml-100k hive-server:/opt/u.data
+docker cp movies.sql hive-server:/opt/
+docker cp weekday_mapper.py hive-server:/opt/
+
+# --- bash u hive-server kontejneru (docker exec -it hive-server bash) ---
+
+# 3. Provera da je sve na mestu
+python --version
+ls /opt/u.data/u.data /opt/movies.sql /opt/weekday_mapper.py
+
+# 4. Pokrenuti sve Hive komande iz fajla (pravi u_data, učitava podatke, TRANSFORM kroz python, GROUP BY weekday)
+beeline -u jdbc:hive2://localhost:10000 -f /opt/movies.sql
+
+# --- beeline (beeline -u jdbc:hive2://localhost:10000) - provere ---
+
+# 5. Broj ocena (oba treba 100000)
+SELECT COUNT(*) FROM u_data;
+SELECT COUNT(*) FROM u_data_new;
+# 6. weekday mora biti 1-7 (1 = ponedeljak, 7 = nedelja), ne unixtime
+SELECT * FROM u_data_new LIMIT 5;
+# 7. Broj ocena po danu u nedelji (7 redova, zbir 100000)
+SELECT weekday, COUNT(*) FROM u_data_new GROUP BY weekday;

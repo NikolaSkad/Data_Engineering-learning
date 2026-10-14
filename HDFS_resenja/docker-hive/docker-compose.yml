@@ -47,7 +47,8 @@ services:
       SERVICE_PRECONDITION: "namenode:9870"
 
   hive-server:
-    image: bde2020/hive:2.3.2-postgresql-metastore
+    build: .
+    image: hive-python:2.3.2
     platform: linux/amd64
     container_name: hive-server
     env_file:
@@ -74,6 +75,8 @@ services:
     image: bde2020/hive-metastore-postgresql:2.3.0
     platform: linux/amd64
     container_name: hive-metastore-postgresql
+    volumes:
+      - metastore_db:/var/lib/postgresql/data
 
   cloudera:
     image: gethue/hue:20201111-135001
@@ -92,3 +95,4 @@ volumes:
   datanode1:
   datanode2:
   datanode3:
+  metastore_db:
