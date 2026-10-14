@@ -1,9 +1,8 @@
-version: '2' 
-
 services:
 
   namenode:
     image: bde2020/hadoop-namenode:2.0.0-hadoop3.2.1-java8
+    platform: linux/amd64
     container_name: namenode
     volumes:
       - hadoop_namenode:/hadoop/dfs/name
@@ -17,6 +16,7 @@ services:
 
   datanode1:
     image: bde2020/hadoop-datanode:2.0.0-hadoop3.2.1-java8
+    platform: linux/amd64
     container_name: datanode1
     depends_on: 
       - namenode
@@ -27,6 +27,7 @@ services:
 
   datanode2:
     image: bde2020/hadoop-datanode:2.0.0-hadoop3.2.1-java8
+    platform: linux/amd64
     container_name: datanode2
     depends_on: 
       - namenode
@@ -37,6 +38,7 @@ services:
 
   spark-master:
     image: bde2020/spark-master:3.0.1-hadoop3.2
+    platform: linux/amd64
     container_name: spark-master
     ports:
       - 8080:8080
@@ -52,6 +54,7 @@ services:
 
   spark-worker1:
     image: bde2020/spark-worker:3.0.1-hadoop3.2
+    platform: linux/amd64
     container_name: spark-worker1
     depends_on:
       - spark-master
@@ -64,6 +67,7 @@ services:
   
   spark-worker2:
     image: bde2020/spark-worker:3.0.1-hadoop3.2
+    platform: linux/amd64
     container_name: spark-worker2
     depends_on:
       - spark-master
@@ -76,6 +80,7 @@ services:
   
   hue:
     image: gethue/hue:20201111-135001
+    platform: linux/amd64
     hostname: hue
     container_name: hue
     dns: 8.8.8.8
