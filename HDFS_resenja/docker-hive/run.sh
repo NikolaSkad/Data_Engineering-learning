@@ -78,13 +78,15 @@ hdfs dfs -cat /user/emp_stariji/*
 
 
 # ===== Hive - Zadatak 2 =====
+# Hive komande su u zipcode.sql (u ovom folderu)
 
 # --- Mac terminal (folder docker-hive) ---
 
 # 1. Preuzeti CSV fajl (-L prati redirect, -o ime fajla)
 curl -L -o zipcodes.csv https://raw.githubusercontent.com/spark-examples/spark-scala-examples/master/src/main/resources/free-zipcode-database.csv
-# prebaciti fajl sa Mac-a u hive-server kontejner (hdfs komanda radi samo u kontejneru)
+# prebaciti CSV i SQL skriptu u hive-server kontejner (hdfs i beeline rade samo u kontejneru)
 docker cp zipcodes.csv hive-server:/opt/zipcodes.csv
+docker cp zipcode.sql hive-server:/opt/
 
 # --- bash u hive-server kontejneru (docker exec -it hive-server bash) ---
 
@@ -97,7 +99,18 @@ hdfs dfs -mkdir -p /user/zipcode
 hdfs dfs -put -f zipcodes.csv /user/zipcode
 hdfs dfs -ls -h /user/zipcode
 
-# --- beeline (beeline -u jdbc:hive2://localhost:10000) ---
+# ----- A) sa skriptom zipcode.sql -----
+
+# bash u kontejneru: izvrši sve komande iz zipcode.sql (koraci 3-6)
+beeline -u jdbc:hive2://localhost:10000 -f /opt/zipcode.sql
+
+# --- beeline (beeline -u jdbc:hive2://localhost:10000) - provere ---
+
+SELECT COUNT(*) FROM Zipcode;     -- 81831
+SELECT COUNT(*) FROM ZipcodeFL;   -- 3086
+SELECT * FROM ZipcodeFL LIMIT 5;
+
+# ----- B) ručno, komanda po komanda u beeline-u -----
 
 # 3. Kreirati tabelu Zipcode
 # OpenCSVSerde: skida navodnike i ne seče vrednosti sa zarezom ("Parc Parque, PR"); sve kolone čita kao STRING
@@ -118,10 +131,12 @@ SELECT * FROM Zipcode LIMIT 5;
 SELECT count(*) FROM Zipcode;   -- 81831
 
 # 5. Prikazati sve podatke za kodove sa Floride
-# TODO
+SELECT * FROM Zipcode WHERE State = 'FL';
 
 # 6. Rezultate smestiti u novu tabelu ZipcodeFL (CTAS)
-# TODO
+CREATE TABLE ZipcodeFL AS SELECT * FROM Zipcode WHERE State = 'FL';
+SELECT COUNT(*) FROM ZipcodeFL;   -- 3086
+
 
 
 # ===== Primer - Movie ratings (MovieLens 100k) =====
@@ -149,10 +164,29 @@ docker cp weekday_mapper.py hive-server:/opt/
 python --version
 ls /opt/u.data/u.data /opt/movies.sql /opt/weekday_mapper.py
 
-# 4. Pokrenuti sve Hive komande iz fajla (pravi u_data, učitava podatke, TRANSFORM kroz python, GROUP BY weekday)
+# 4. Hive deo - DVA NAČINA (izaberi jedan)
+#
+# NAČIN A - ceo fajl odjednom (bash u kontejneru):
+#   pravi u_data, učitava podatke, TRANSFORM kroz python, GROUP BY weekday.
 beeline -u jdbc:hive2://localhost:10000 -f /opt/movies.sql
 
-# --- beeline (beeline -u jdbc:hive2://localhost:10000) - provere ---
+# NAČIN B - ručno, komanda po komanda (beeline -u jdbc:hive2://localhost:10000):
+
+# tabela sa ocenama (u.data je razdvojen tabom)
+DROP TABLE IF EXISTS u_data;
+CREATE TABLE u_data (userid INT, movieid INT, rating INT, unixtime STRING) ROW FORMAT DELIMITED FIELDS TERMINATED BY '\t' STORED AS TEXTFILE;
+# učitati samo fajl u.data (ne ceo folder, inače uđu i u.item, u1.base...)
+LOAD DATA LOCAL INPATH '/opt/u.data/u.data' OVERWRITE INTO TABLE u_data;
+SELECT COUNT(*) FROM u_data;      -- 100000
+
+# nova tabela gde je unixtime zamenjen danom u nedelji
+DROP TABLE IF EXISTS u_data_new;
+CREATE TABLE u_data_new (userid INT, movieid INT, rating INT, weekday INT) ROW FORMAT DELIMITED FIELDS TERMINATED BY '\t';
+# registrovati python skriptu, pa svaki red provući kroz nju (TRANSFORM)
+add FILE /opt/weekday_mapper.py;
+INSERT OVERWRITE TABLE u_data_new SELECT TRANSFORM (userid, movieid, rating, unixtime) USING 'python weekday_mapper.py' AS (userid, movieid, rating, weekday) FROM u_data;
+
+# --- provere (važe za oba načina) ---
 
 # 5. Broj ocena (oba treba 100000)
 SELECT COUNT(*) FROM u_data;
