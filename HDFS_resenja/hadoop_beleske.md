@@ -33,13 +33,13 @@ Radi na **običnom (commodity) hardveru**: jeftini računari, a pouzdanost dolaz
 
 **Analogija – biblioteka:**
 
-| HDFS         | Biblioteka                                                   |
-| ------------ | ------------------------------------------------------------ |
-| **NameNode** | **katalog**: zna koja knjiga postoji i na kojoj je polici    |
-| **DataNode** | **police**: tu su same knjige                                |
-| **Blok**     | jedan tom knjige (velika knjiga je podeljena na više tomova) |
-| **Replika**  | kopija toma na drugoj polici, za slučaj da se jedna sruši    |
-| **Metadata** | kartica u katalogu: naslov, autor, gde se nalazi             |
+| HDFS         | Biblioteka                                                       |
+| ------------ | ---------------------------------------------------------------- |
+| **NameNode** | **katalog**: zna koja knjiga postoji i na kojoj je polici        |
+| **DataNode** | **police**: tu su same knjige                                    |
+| **Blok**     | jedan deo knjige (velika knjiga se iseče na delove od po 128 MB) |
+| **Replika**  | kopija tog dela na drugoj polici, za slučaj da se jedna sruši    |
+| **Metadata** | kartica u katalogu: naslov, autor, gde se nalazi                 |
 
 **Pojmovi:**
 
