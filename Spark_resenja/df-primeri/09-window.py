@@ -36,5 +36,6 @@ df.show()
 windowSpec = Window.partitionBy("department").orderBy("salary")
 df.withColumn("row_number", row_number().over(windowSpec)).show()
 df.withColumn("dense_rank", dense_rank().over(windowSpec)).show()
+df.withColumn("rank", rank().over(windowSpec)).show()
 
 df.withColumn("lag", lag("salary", 2).over(windowSpec)).show()
