@@ -1,2 +1,6 @@
 # beleške (.md) ne formatiraj: Ruff bi preformatirao primere koda i pokvario poravnate komentare
 extend-exclude = ["*.md"]
+
+[lint]
+# shebang bez chmod +x: skripte se pokreću sa spark-submit, ne kao ./skripta.py
+ignore = ["EXE001"]
