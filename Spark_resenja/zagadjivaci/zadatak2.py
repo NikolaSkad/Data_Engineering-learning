@@ -52,7 +52,10 @@ godine = [str(g) for g in range(2010, 2018)]
 # null -> 0 samo u kopiji, original df ostaje sa null (treba za unpivot i skok)
 df_nule = df.fillna(0, subset=godine)
 # ukupno = 2010 + 2011 + ... + 2017 u istom redu (Python sum sabira kolone)
-df_nule = df_nule.withColumn("ukupno", sum(F.col(g) for g in godine))
+# Python sum, ne F.sum: F.sum je agregacija jedne kolone kroz redove
+# F.lit(0) = početna vrednost kao kolona; bez nje sum počinje od broja 0,
+# pa mypy misli da rezultat može biti 0 umesto Column
+df_nule = df_nule.withColumn("ukupno", sum((F.col(g) for g in godine), F.lit(0)))
 
 # df_nule.show(15)
 
