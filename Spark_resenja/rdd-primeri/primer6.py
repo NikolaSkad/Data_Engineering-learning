@@ -1,13 +1,16 @@
 #!/usr/bin/python3
 
 from __future__ import print_function
-from pyspark import SparkContext, SparkConf
+
+from pyspark import SparkConf, SparkContext
+
 
 def quiet_logs(sc):
-  logger = sc._jvm.org.apache.log4j
-#   logger.LogManager.getLogger("org").setLevel(logger.Level.ERROR)
-#   logger.LogManager.getLogger("akka").setLevel(logger.Level.ERROR)
-  logger.LogManager.getRootLogger().setLevel(logger.Level.ERROR)
+    logger = sc._jvm.org.apache.log4j
+    #   logger.LogManager.getLogger("org").setLevel(logger.Level.ERROR)
+    #   logger.LogManager.getLogger("akka").setLevel(logger.Level.ERROR)
+    logger.LogManager.getRootLogger().setLevel(logger.Level.ERROR)
+
 
 conf = SparkConf().setAppName("sharedvars").setMaster("local")
 sc = SparkContext(conf=conf)
