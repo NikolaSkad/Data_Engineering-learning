@@ -1,4 +1,6 @@
 #!/usr/bin/python3
+# primer iz kursa: radi u Spark-u, mypy je strožiji od pyspark tipova
+# mypy: ignore-errors
 
 import os
 

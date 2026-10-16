@@ -1,6 +1,9 @@
 # beleške (.md) ne formatiraj: Ruff bi preformatirao primere koda i pokvario poravnate komentare
 extend-exclude = ["*.md"]
 
+# Python u Spark kontejneru je 3.7, pa Ruff ne sme da predlaže noviju sintaksu (npr. dict[...] umesto Dict[...])
+target-version = "py37"
+
 [lint]
 # shebang bez chmod +x: skripte se pokreću sa spark-submit, ne kao ./skripta.py
 ignore = ["EXE001"]

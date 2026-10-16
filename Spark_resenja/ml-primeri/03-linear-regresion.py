@@ -1,12 +1,16 @@
 #!/usr/bin/python
+# primer iz kursa: radi u Spark-u, mypy je strožiji od pyspark tipova
+# mypy: ignore-errors
 
 # apk update
 # apk add make automake gcc g++ subversion python3-dev
 # pip3 install numpy
 
+from pyspark.ml.evaluation import RegressionEvaluator
 from pyspark.ml.linalg import Vectors, VectorUDT
-from pyspark.ml.regression import LinearRegression, RegressionEvaluator
+from pyspark.ml.regression import LinearRegression
 from pyspark.sql import SparkSession
+from pyspark.sql.functions import col
 
 
 def quiet_logs(sc):

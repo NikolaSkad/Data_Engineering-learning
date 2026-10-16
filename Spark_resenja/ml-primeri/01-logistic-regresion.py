@@ -1,11 +1,18 @@
 #!/usr/bin/python
+# primer iz kursa: radi u Spark-u, mypy je strožiji od pyspark tipova
+# mypy: ignore-errors
 
 # apk update
 # apk add make automake gcc g++ subversion python3-dev
 # pip3 install numpy
 
+from __future__ import annotations
+
+from typing import Any
+
 from pyspark.ml.classification import LogisticRegression
 from pyspark.ml.linalg import Vectors
+from pyspark.ml.param import Param
 from pyspark.sql import SparkSession
 
 
@@ -46,7 +53,8 @@ print("Model 1 was fit using parameters: ")
 print(model1.extractParamMap())
 
 # We may alternatively specify parameters using a Python dictionary as a paramMap
-paramMap = {lr.maxIter: 20}
+# dict[Param, Any]: u istom dict-u su int, float i str vrednosti (mypy bi inače uzeo tip prve)
+paramMap: dict[Param, Any] = {lr.maxIter: 20}
 paramMap[lr.maxIter] = 30  # Specify 1 Param, overwriting the original maxIter.
 paramMap.update({lr.regParam: 0.1, lr.threshold: 0.55})  # Specify multiple Params.
 
@@ -80,6 +88,5 @@ result = prediction.select("features", "label", "myProbability", "prediction").c
 
 for row in result:
     print(
-        "features=%s, label=%s -> prob=%s, prediction=%s"
-        % (row.features, row.label, row.myProbability, row.prediction)
+        f"features={row.features}, label={row.label} -> prob={row.myProbability}, prediction={row.prediction}"
     )
