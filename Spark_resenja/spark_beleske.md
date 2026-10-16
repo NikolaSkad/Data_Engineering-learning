@@ -201,16 +201,57 @@ df.select("opstina").distinct()                       # različite vrednosti
 df.orderBy(col("plata").desc())                       # sortiranje
 ```
 
-### Agregacije
+### Agregacije (groupBy + agg)
 
-```python
-df.groupBy("department").agg(
-    sum("salary").alias("sum_salary"),
-    avg("salary").alias("avg_salary"),
-    max("bonus").alias("max_bonus"))
+- `groupBy(...)` samo **podeli redove u grupe** i vrati `GroupedData`, koji još nije tabela.
+- `agg(...)` kaže **šta da izračuna za svaku grupu** i vrati DataFrame sa jednim redom po grupi.
+- Uvek importuj `from pyspark.sql import functions as F` i piši `F.sum`, `F.max`... Ako uradiš `from pyspark.sql.functions import sum`, pregaziš Python-ov ugrađeni `sum`.
+
+Primer: grupisanje po **dve kolone** i **više vrednosti** odjednom.
+
+```
+grad     | prodavnica | proizvod | kolicina | cena
+Beograd  | Maxi       | hleb     | 10       | 60
+Beograd  | Maxi       | mleko    | 5        | 120
+Beograd  | Idea       | hleb     | 8        | 65
+Novi Sad | Maxi       | hleb     | 12       | 58
+Novi Sad | Maxi       | jaja     | 3        | 200
+Novi Sad | Maxi       | mleko    | 7        | 115
 ```
 
-Funkcije: `sum`, `avg`, `min`, `max`, `count`, `countDistinct`...
+```python
+from pyspark.sql import functions as F
+
+df.groupBy("grad", "prodavnica").agg(
+    F.sum("kolicina").alias("ukupno_komada"),
+    F.count("*").alias("broj_stavki"),
+    F.countDistinct("proizvod").alias("razlicitih_proizvoda"),
+    F.avg("cena").alias("prosecna_cena"),
+    F.max("cena").alias("najskuplje"),
+).show()
+```
+
+```
+grad     | prodavnica | ukupno_komada | broj_stavki | razlicitih_proizvoda | prosecna_cena | najskuplje
+Beograd  | Maxi       | 15            | 2           | 2                    | 90.0          | 120
+Beograd  | Idea       | 8             | 1           | 1                    | 65.0          | 65
+Novi Sad | Maxi       | 22            | 3           | 3                    | 124.33        | 200
+```
+
+- Grupa je **kombinacija** kolona, pa su Maxi u Beogradu i Maxi u Novom Sadu dve različite grupe.
+- Svaka funkcija u `agg` pravi **jednu kolonu**, a `alias` joj daje ime. Bez `alias` bi se kolona zvala npr. `sum(kolicina)`.
+- `count("*")` broji **redove**, a `countDistinct("kolona")` broji **različite vrednosti**.
+- `.sum("x")` direktno na `groupBy` radi samo jednu funkciju i ne može da promeni ime kolone, zato se u praksi koristi `agg`.
+
+Isto u SQL-u:
+
+```sql
+SELECT grad, prodavnica, SUM(kolicina), COUNT(*), COUNT(DISTINCT proizvod), AVG(cena), MAX(cena)
+FROM prodaja
+GROUP BY grad, prodavnica
+```
+
+Funkcije: `sum`, `avg`, `min`, `max`, `count`, `countDistinct`, `first`, `last`...
 
 ### Join
 
@@ -248,16 +289,140 @@ Ako za neku kombinaciju nema podataka, u ćeliji je `null`.
 
 ### Window (analitičke) funkcije
 
-Računaju vrednost **po grupi, ali bez spajanja redova** (za razliku od groupBy).
+Window (prozor) kaže Spark-u: **„kad za neki red računaš nešto, gledaj samo redove iz njegove grupe, u ovom redosledu"**.
 
 ```python
-w = Window.partitionBy("department").orderBy("salary")
-df.withColumn("rank", rank().over(w))
-df.withColumn("prethodna", lag("kolicina").over(w))   # vrednost iz prethodnog reda
+from pyspark.sql.window import Window
+
+w = Window.partitionBy("grad").orderBy(F.col("prodaja").desc())
 ```
 
-- Rangiranje: `row_number`, `rank`, `dense_rank`, `ntile`.
-- Ostalo: `lag`, `lead` (prethodni/sledeći red), `cume_dist`.
+- `partitionBy("grad")` deli redove u grupe, po jednu za svaki grad. Svaka grupa je poseban „prozor".
+- `orderBy(...desc())` sortira redove unutar svakog prozora, od najvećeg ka najmanjem.
+- Sam `w` **ne radi ništa**, to je samo pravilo. Radi tek kad se upotrebi sa funkcijom: `F.row_number().over(w)`.
+
+```python
+df.withColumn("rang", F.row_number().over(w))
+```
+
+```
+pre:                         posle (rang se računa unutar svakog grada, kreće od 1 iznova):
+grad     | firma | prodaja    grad     | firma | prodaja | rang
+Beograd  | B     | 120        Beograd  | A     | 500     | 1
+Novi Sad | D     | 900        Beograd  | B     | 120     | 2
+Beograd  | A     | 500   ->   Beograd  | C     | 30      | 3
+Novi Sad | E     | 40         Novi Sad | D     | 900     | 1
+Beograd  | C     | 30         Novi Sad | E     | 40      | 2
+```
+
+**Najveći po grupi** (top 1 / top N): rang, pa filter.
+
+```python
+df.withColumn("rang", F.row_number().over(w)).where("rang = 1").drop("rang")
+```
+
+#### Korak po korak: najveća firma po opštini
+
+```python
+po_opstinama = df_nule.groupBy("Opština postrojenja", "PIB", "Preduzece").agg(
+    F.sum("ukupno").alias("ukupno_tona")
+)
+
+w = Window.partitionBy("Opština postrojenja").orderBy(F.col("ukupno_tona").desc())
+
+najveci_po_opstinama = (
+    po_opstinama
+    .withColumn("rang", F.row_number().over(w))
+    .where("rang = 1")
+    .drop("rang")
+    .orderBy("Opština postrojenja")
+)
+
+najveci_po_opstinama.show(truncate=False)
+```
+
+Zagrade `( ... )` oko lanca omogućavaju da svaka metoda bude u novom redu, bez `\`.
+
+**Polazna tačka (`df_nule`)**: jedan red = firma + postrojenje + vrsta otpada.
+
+```
+Opština  | PIB | Preduzece | ukupno
+Barajevo | 1   | Firma A   | 300
+Barajevo | 1   | Firma A   | 200     <- ista firma, druga vrsta otpada
+Barajevo | 2   | Firma B   | 120
+Cukarica | 3   | Firma D   | 900
+Cukarica | 4   | Firma E   | 40
+```
+
+**1. `groupBy(...).agg(F.sum("ukupno"))`**: svaka firma dobije jedan red sa zbirom.
+
+```
+Opština  | PIB | Preduzece | ukupno_tona
+Barajevo | 1   | Firma A   | 500     <- 300 + 200
+Barajevo | 2   | Firma B   | 120
+Cukarica | 3   | Firma D   | 900
+Cukarica | 4   | Firma E   | 40
+```
+
+**2. `w = Window...`**: samo pravilo, ništa se još ne računa. Grupe su opštine, a unutar grupe se sortira od najveće količine.
+
+**3. `.withColumn("rang", F.row_number().over(w))`**: redni broj unutar svake opštine.
+
+```
+Opština  | Preduzece | ukupno_tona | rang
+Barajevo | Firma A   | 500         | 1
+Barajevo | Firma B   | 120         | 2
+Cukarica | Firma D   | 900         | 1     <- brojanje kreće ispočetka
+Cukarica | Firma E   | 40          | 2
+```
+
+**4. `.where("rang = 1")`**: ostaju samo prvi u svakoj opštini.
+
+```
+Barajevo | Firma A | 500 | 1
+Cukarica | Firma D | 900 | 1
+```
+
+**5. `.drop("rang")`**: pomoćna kolona se izbacuje.
+
+**6. `.orderBy("Opština postrojenja")`**: opštine po abecedi.
+
+**7. `.show()`**: ovo je **akcija**, pa tek sad Spark izvrši korake 1–6 (do tada je samo pravio plan).
+
+```
+sve stavke  ->  jedna po firmi  ->  rang unutar opštine  ->  samo rang 1  ->  najveći po opštini
+ (df_nule)       (groupBy)           (window)                 (where)
+```
+
+**Razlika od groupBy:**
+
+|               | `groupBy` + `agg`     | Window                            |
+| ------------- | --------------------- | --------------------------------- |
+| Redovi posle  | jedan red po grupi    | **svi redovi ostaju**             |
+| Ostale kolone | nestaju               | ostaju                            |
+| Primer        | ukupna prodaja po gradu | rang firme **unutar** grada     |
+
+Zato groupBy ne može da kaže **koja** firma je najveća (posle `agg` firma nestane), a window može.
+
+**Funkcije za rangiranje**, kad dve firme imaju istu vrednost (500, 500, 120):
+
+| funkcija     | rezultat | za „najveći po grupi"                 |
+| ------------ | -------- | ------------------------------------- |
+| `row_number` | 1, 2, 3  | uvek tačno jedan red                  |
+| `rank`       | 1, 1, 3  | vrati sve izjednačene na prvom mestu  |
+| `dense_rank` | 1, 1, 2  | isto, ali bez preskakanja brojeva     |
+
+Ostale window funkcije: `lag` / `lead` (vrednost iz prethodnog / sledećeg reda u prozoru), `ntile`, `cume_dist`, i agregacije preko prozora (`F.sum(...).over(w)`).
+
+```python
+df.withColumn("prethodna", F.lag("kolicina").over(w))   # vrednost iz prethodnog reda
+```
+
+Isto u SQL-u:
+
+```sql
+ROW_NUMBER() OVER (PARTITION BY grad ORDER BY prodaja DESC)
+```
 
 ### Keširanje
 

@@ -52,6 +52,7 @@ services:
       - ../rdd-primeri:/home/rdd-primeri
       - ../df-primeri:/home/df-primeri
       - ../ml-primeri:/home/ml-primeri
+      - ../zagadjivaci:/home/zagadjivaci
 
   spark-worker1:
     image: bde2020/spark-worker:3.0.1-hadoop3.2
