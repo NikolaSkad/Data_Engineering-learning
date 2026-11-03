@@ -35,11 +35,13 @@ public class TraFilterExample {
                         return joiner.toString();
                     }
                 })
-                // Create a new KStream that consists all records of this stream which do not satisfy the given
+                // Create a new KStream that consists all records of this stream which do not
+                // satisfy the given
                 .filterNot((key, value) -> value.split(KafkaConstants.SEPARATOR)[1].isEmpty())
                 .to(KafkaConstants.TOPIC_NAME + "-tra");
 
-        @SuppressWarnings("resource") final KafkaStreams streams = new KafkaStreams(builder.build(), streamsConfiguration);
+        @SuppressWarnings("resource")
+        final KafkaStreams streams = new KafkaStreams(builder.build(), streamsConfiguration);
         streams.cleanUp();
         streams.start();
 
