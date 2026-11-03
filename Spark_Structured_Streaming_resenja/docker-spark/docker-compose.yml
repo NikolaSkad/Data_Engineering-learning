@@ -1,9 +1,8 @@
-version: '3'
-
 services:
 
   namenode:
     image: bde2020/hadoop-namenode:2.0.0-hadoop3.2.1-java8
+    platform: linux/amd64
     container_name: namenode
     volumes:
       - hadoop_namenode:/hadoop/dfs/name
@@ -17,6 +16,7 @@ services:
 
   datanode1:
     image: bde2020/hadoop-datanode:2.0.0-hadoop3.2.1-java8
+    platform: linux/amd64
     container_name: datanode1
     depends_on:
       - namenode
@@ -27,6 +27,7 @@ services:
 
   spark-master:
     image: bde2020/spark-master:3.0.1-hadoop3.2
+    platform: linux/amd64
     container_name: spark-master
     ports:
       - 8080:8080
@@ -37,9 +38,13 @@ services:
       - ./hadoop.env
     volumes:
       - ../primeri:/spark/primeri
+      - ../zadaci:/spark/zadaci
+      # keš za --packages (spark-sql-kafka JAR-ovi), da se ne skida pri svakom spark-submit
+      - ivy_cache:/root/.ivy2
 
   spark-worker1:
     image: bde2020/spark-worker:3.0.1-hadoop3.2
+    platform: linux/amd64
     container_name: spark-worker1
     depends_on:
       - spark-master
@@ -52,6 +57,7 @@ services:
 
   zoo1:
     image: zookeeper:3.4.9
+    platform: linux/amd64
     container_name: zoo1
     ports:
       - "2181:2181"
@@ -65,6 +71,7 @@ services:
 
   kafka1:
     image: confluentinc/cp-kafka:5.3.1
+    platform: linux/amd64
     container_name: kafka1
     ports:
       - "9092:9092"
@@ -81,8 +88,11 @@ services:
     depends_on:
       - zoo1
 
+  # Reddit producer ne radi bez važećih API ključeva; ne pokreće se podrazumevano.
+  # Ručno: docker compose --profile reddit up -d producer1
   producer1:
     build: ../producer
+    profiles: ["reddit"]
     container_name: kafka_producer_1
     environment:
       KAFKA_BROKER: "kafka1:19092"
@@ -90,8 +100,12 @@ services:
     depends_on:
       - kafka1
 
+  # Hue nije potreban za streaming; HDFS se može pregledati na http://localhost:9870
+  # Ručno: docker compose --profile hue up -d hue
   hue:
     image: gethue/hue:20201111-135001
+    platform: linux/amd64
+    profiles: ["hue"]
     hostname: hue
     container_name: hue
     dns: 8.8.8.8
@@ -109,3 +123,4 @@ volumes:
   zoo1:
   zoo1log:
   kafka1:
+  ivy_cache:
