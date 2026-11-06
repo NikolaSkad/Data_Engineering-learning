@@ -24,3 +24,40 @@ Poređenje tehnologija iz ASVSP kursa (lekcije 01–06) sa onim što se danas ko
 - **Spark i Kafka su i dalje standard.** Ono što sam naučio direktno se prenosi.
 - **Zone iz projekta (raw / transformation / curated)** su isto što i "medallion" arhitektura (bronze / silver / gold).
 - **Najveće praznine u odnosu na oglase za posao:** Airflow, dbt, Delta/Iceberg i cloud (najčešće AWS). Redosled učenja posle projekta.
+
+## Plan učenja: PySpark, Kafka 4, S3 (MinIO), Docker Compose
+
+### 1. Glavni kurs: DataTalksClub Data Engineering Zoomcamp (besplatno)
+
+<https://github.com/DataTalksClub/data-engineering-zoomcamp>
+
+Besplatan kurs sa video lekcijama, domaćim zadacima i rešenjima. Moduli:
+
+- Docker i Compose (od nule),
+- orkestracija (Kestra ili Airflow, zavisi od godine),
+- data warehouse,
+- **batch obrada: PySpark** (DataFrame, SQL, `groupBy`, `join`, window),
+- **streaming: Kafka** (producer, consumer, streaming obrada),
+- završni projekat, vrlo sličan ASVSP projektu.
+
+Oni koriste Google Cloud Storage umesto S3-a. Kod je skoro isti, menja se samo putanja (`gs://` → `s3a://`), pa sa MinIO-om sve radi lokalno.
+
+### 2. Zadaci za Spark i window funkcije
+
+- **Databricks "Learning Spark, 2nd Edition"** (2020, Spark 3, besplatna PDF verzija na Databricks sajtu) i primeri na <https://github.com/databricks/LearningSparkV2>. Knjiga u `Knjige/` je prvo izdanje iz 2015 (Spark 1.x), zastarela.
+- **Window funkcije:** zadaci na **DataLemur** (datalemur.com) ili **StrataScratch**. SQL zadaci sa intervjua, rešavaju se u Spark SQL-u ili DataFrame API-ju, window funkcije su iste.
+
+### 3. Kafka
+
+- **Confluent Developer** (developer.confluent.io): kursevi "Apache Kafka 101" i tutorijali, ažurni za KRaft.
+- **`Knjige/confluent-kafka-definitive-guide-complete.pdf`:** koncepti (particije, consumer grupe, replikacija) važe i dalje, preskočiti poglavlja o ZooKeeper-u.
+
+### 4. S3 / MinIO + Spark
+
+Nema posebnog kursa, to je samo podešavanje (`s3a://` pristup u compose fajlu). Čitanje i pisanje (`spark.read.parquet("s3a://...")`) je isto kao sa HDFS-om.
+
+### Redosled
+
+1. **Zoomcamp, moduli za Docker, Spark i Kafku**, sa domaćim zadacima. Kad zapnem: hintovi umesto rešenja.
+2. **Paralelno, svaki dan 2 do 3 zadatka sa window funkcijama** na DataLemur-u.
+3. **Onda ASVSP projekat**, sa svim što sam naučio.

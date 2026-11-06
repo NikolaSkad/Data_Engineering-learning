@@ -5,7 +5,7 @@
 
 # ===== tab 1: podizanje okruženja =====
 
-cd ~/Desktop/DE_Praksa/moja_resenja/Spark_Structured_Streaming_resenja/docker-spark
+cd ~/Desktop/DE_Praksa/de-learning/praksa/Spark_Structured_Streaming_resenja/docker-spark
 # diže Kafku, Spark, HDFS i bluesky_producer (zadatak 1)
 docker compose up -d
 # posle ~30 s svi treba da su Up, namenode i datanode1 (healthy) može da potraje minut

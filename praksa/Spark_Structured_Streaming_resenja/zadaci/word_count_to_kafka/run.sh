@@ -4,7 +4,7 @@
 
 # ===== Podizanje okruženja =====
 
-cd ~/Desktop/DE_Praksa/moja_resenja/Spark_Structured_Streaming_resenja/docker-spark
+cd ~/Desktop/DE_Praksa/de-learning/praksa/Spark_Structured_Streaming_resenja/docker-spark
 # diže i bluesky-producer, on puni subreddit-bluesky-en
 docker compose up -d
 # ako je ostao stari Spark program, gasi se (dva drivera pod emulacijom zagušuju kontejner)
