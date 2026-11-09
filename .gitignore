@@ -9,3 +9,10 @@ target/
 zoomcamp/data/
 .ipynb_checkpoints/
 .virtual_documents/
+
+# podaci u zoomcamp-u (CSV, gz, parquet i Spark izlazni folderi)
+zoomcamp/**/*.csv
+zoomcamp/**/*.csv.gz
+zoomcamp/**/*.parquet
+zoomcamp/**/*.crc
+zoomcamp/**/_SUCCESS
