@@ -10,9 +10,9 @@ zoomcamp/data/
 .ipynb_checkpoints/
 .virtual_documents/
 
-# podaci u zoomcamp-u (CSV, gz, parquet i Spark izlazni folderi)
-zoomcamp/**/*.csv
-zoomcamp/**/*.csv.gz
-zoomcamp/**/*.parquet
-zoomcamp/**/*.crc
-zoomcamp/**/_SUCCESS
+# podaci ne idu u git (čuvaju se lokalno ili u skladištu podataka)
+*.csv
+*.gz
+*.parquet
+*.crc
+_SUCCESS
