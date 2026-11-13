@@ -5,7 +5,7 @@
 #   gcloud dataproc jobs submit pyspark -> spark-submit
 #
 # Upotreba (iz bilo kog foldera):
-#   ./local_dataproc.sh all              # sve odjednom: start + upload + submit/check za 2020 i 2021
+#   ./local_dataproc.sh all              # sve odjednom: start + upload + submit/check za 2020 i 2021 + stop
 #   ./local_dataproc.sh all 2021         # isto, samo za navedene godine
 #
 #   ./local_dataproc.sh start            # MinIO + master + worker
@@ -81,7 +81,7 @@ check() {
 }
 
 all() {
-    # Ceo tok jednim pozivom: klaster gore, podaci u bucket, po jedan job za svaku godinu.
+    # Ceo tok jednim pozivom: klaster gore, podaci u bucket, po jedan job za svaku godinu, pa sve ugasi.
     local years=("$@")
     [ ${#years[@]} -eq 0 ] && years=(2020 2021)
 
@@ -92,6 +92,8 @@ all() {
         submit "$year"
         check "$year"
     done
+
+    stop
 }
 
 stop() {

@@ -15,8 +15,8 @@ Job je `../06_spark_sql.py` (bez `.master()` u kodu). Ulaz i izlaz se prosleđuj
 ## Pokretanje
 
 ```bash
-./local_dataproc.sh all          # start + upload + report-2020 i report-2021
-./local_dataproc.sh stop         # ugasi worker, master i MinIO
+./local_dataproc.sh all          # start + upload + report-2020 i report-2021 + stop
+./local_dataproc.sh stop         # ručno gašenje (worker, master, MinIO), npr. posle "start"
 ```
 
 Ili korak po korak: `start`, `upload`, `submit <godina>`, `check <godina>`, `stop`.
