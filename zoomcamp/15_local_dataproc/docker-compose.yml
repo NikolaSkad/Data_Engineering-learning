@@ -1,0 +1,86 @@
+# Lekcija 15 (Dataproc) kao Docker Compose klaster: sve u kontejnerima, na računaru treba samo Docker.
+#
+#   docker compose up -d                  # MinIO + upload podataka + master + 2 worker-a
+#   docker compose run --rm submit 2021   # job za godinu (kao "Submit job" na Dataproc-u)
+#   docker compose down                   # gasi sve (podaci ostaju u MinIO volume-u)
+#
+# Ne radi istovremeno sa ./local_dataproc.sh: koriste iste portove (7077, 8080, 9000, 9001).
+
+x-spark: &spark
+  image: apache/spark:4.2.0-python3 # ista verzija kao pyspark u .venv-u
+  networks: [spark]
+
+services:
+  # S3 skladište (umesto GCS bucket-a). Volume je isti kao u ../../minio/, pa su podaci zajednički.
+  minio:
+    image: cgr.dev/chainguard/minio:latest
+    command: server /data --console-address ":9001"
+    ports:
+      - "9000:9000" # S3 API
+      - "9001:9001" # konzola (minioadmin / minioadmin)
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+    volumes:
+      - minio_data:/data
+    networks: [spark]
+
+  # Jednokratno: napravi bucket i pošalje data/pq (sync šalje samo ono što fali), pa se ugasi.
+  minio-init:
+    image: amazon/aws-cli:latest
+    depends_on: [minio]
+    environment:
+      AWS_ACCESS_KEY_ID: minioadmin
+      AWS_SECRET_ACCESS_KEY: minioadmin
+      AWS_DEFAULT_REGION: us-east-1
+      AWS_ENDPOINT_URL: http://minio:9000
+    volumes:
+      - ../data/pq:/data/pq:ro
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        until aws s3 ls >/dev/null 2>&1; do echo "čekam MinIO..."; sleep 1; done
+        aws s3 mb s3://nyc-tlc 2>/dev/null || true
+        aws s3 sync /data/pq s3://nyc-tlc/pq --only-show-errors
+        echo "upload gotov"
+    networks: [spark]
+
+  # Master (UI na http://localhost:8080)
+  spark-master:
+    <<: *spark
+    command: /opt/spark/bin/spark-class org.apache.spark.deploy.master.Master --host spark-master
+    ports:
+      - "7077:7077"
+      - "8080:8080"
+
+  # Worker-i: 2 kontejnera, svaki sa 2 jezgra i 2 GB (kao mali klaster od 2 mašine)
+  spark-worker:
+    <<: *spark
+    command: /opt/spark/bin/spark-class org.apache.spark.deploy.worker.Worker spark://spark-master:7077
+    environment:
+      SPARK_WORKER_CORES: 2
+      SPARK_WORKER_MEMORY: 2g
+    depends_on: [spark-master]
+    deploy:
+      replicas: 2
+
+  # Šalje 06_spark_sql.py na klaster. Ne pokreće se sa "up", samo sa "docker compose run --rm submit <godina>".
+  submit:
+    <<: *spark
+    profiles: [job]
+    user: root # zbog keša za jar-ove u volume-u
+    depends_on: [spark-master, minio]
+    volumes:
+      - ../06_spark_sql.py:/opt/app/06_spark_sql.py:ro
+      - ./submit.sh:/opt/app/submit.sh:ro
+      - ivy_cache:/opt/ivy # hadoop-aws + AWS SDK (~650 MB) se skidaju samo prvi put
+    entrypoint: ["/bin/bash", "/opt/app/submit.sh"]
+
+volumes:
+  minio_data:
+    external: true
+    name: minio_minio_data # volume iz ../../minio/docker-compose.yml
+  ivy_cache:
+
+networks:
+  spark:
