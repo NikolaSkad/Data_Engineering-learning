@@ -17,9 +17,7 @@ input_green = args.input_green
 input_yellow = args.input_yellow
 output = args.output
 
-spark = (
-    SparkSession.builder.master("spark://localhost:7077").appName("test").getOrCreate()
-)
+spark = SparkSession.builder.appName("test").getOrCreate()
 df_green = spark.read.option("recursiveFileLookup", "true").parquet(input_green)
 df_green = df_green.withColumnRenamed(
     "lpep_pickup_datetime", "pickup_datetime"
