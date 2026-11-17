@@ -1,7 +1,7 @@
 # Lekcija 15 (Dataproc) kao Docker Compose klaster: sve u kontejnerima, na računaru treba samo Docker.
 #
-#   docker compose up -d                  # MinIO + upload podataka + master + 2 worker-a
-#   docker compose run --rm submit 2021   # job za godinu (kao "Submit job" na Dataproc-u)
+#   docker compose up -d                                       # MinIO + upload + master + 2 worker-a + submit
+#   docker compose exec submit bash /opt/app/submit.sh 2021    # job za godinu (kao "Submit job" na Dataproc-u)
 #   docker compose down                   # gasi sve (podaci ostaju u MinIO volume-u)
 #
 # Ne radi istovremeno sa ./local_dataproc.sh: koriste iste portove (7077, 8080, 9000, 9001).
@@ -64,17 +64,17 @@ services:
     deploy:
       replicas: 2
 
-  # Šalje 06_spark_sql.py na klaster. Ne pokreće se sa "up", samo sa "docker compose run --rm submit <godina>".
+  # "Edge node": stalno radi i čeka, a job-ovi se šalju sa
+  #   docker compose exec submit bash /opt/app/submit.sh <godina>
   submit:
     <<: *spark
-    profiles: [job]
     user: root # zbog keša za jar-ove u volume-u
     depends_on: [spark-master, minio]
     volumes:
       - ../06_spark_sql.py:/opt/app/06_spark_sql.py:ro
       - ./submit.sh:/opt/app/submit.sh:ro
       - ivy_cache:/opt/ivy # hadoop-aws + AWS SDK (~650 MB) se skidaju samo prvi put
-    entrypoint: ["/bin/bash", "/opt/app/submit.sh"]
+    command: sleep infinity
 
 volumes:
   minio_data:

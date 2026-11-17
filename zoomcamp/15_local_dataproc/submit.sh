@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
-# Pokreće se u "submit" kontejneru: docker compose run --rm submit <godina>
+# Pokreće se u "submit" kontejneru: docker compose exec submit bash /opt/app/submit.sh <godina>
 set -euo pipefail
 
-YEAR="${1:?navedi godinu, npr. docker compose run --rm submit 2021}"
+YEAR="${1:?navedi godinu, npr. docker compose exec submit bash /opt/app/submit.sh 2021}"
 
 # Driver radi u ovom kontejneru, a executor-i na worker-ima mu se javljaju nazad preko ove IP adrese.
 DRIVER_HOST="$(hostname -i | awk '{print $1}')"
