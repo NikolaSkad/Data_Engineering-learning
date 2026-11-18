@@ -1,0 +1,72 @@
+services:
+  minio:
+    image: cgr.dev/chainguard/minio:latest
+    command: server /data --console-address ":9001"
+    ports:
+      - 9000:9000
+      - 9001:9001
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+    volumes:
+      - minio_data:/data
+    networks: [spark]
+
+  minio-init:
+    image: amazon/aws-cli:latest
+    depends_on: [minio]
+    environment:
+      AWS_ACCESS_KEY_ID: minioadmin
+      AWS_SECRET_ACCESS_KEY: minioadmin
+      AWS_DEFAULT_REGION: us-east-1
+      AWS_ENDPOINT_URL: http://minio:9000
+    volumes:
+      - ../data/pq:/data/pq:ro
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        until aws s3 ls >/dev/null 2>&1; do echo "čekam MinIO..."; sleep 1; done
+        aws s3 mb s3://nyc-tlc 2>/dev/null || true
+        aws s3 sync /data/pq s3://nyc-tlc/pq --only-show-errors
+        echo "upload gotov"
+    networks: [spark]
+
+  spark-master:
+    image: apache/spark:4.2.0-python3
+    command: /opt/spark/bin/spark-class org.apache.spark.deploy.master.Master --host spark-master
+    ports:
+      - 7077:7077
+      - 8080:8080
+    networks: [spark]
+
+  spark-worker:
+    image: apache/spark:4.2.0-python3
+    command: /opt/spark/bin/spark-class org.apache.spark.deploy.worker.Worker spark://spark-master:7077
+    environment:
+      SPARK_WORKER_CORES: 2
+      SPARK_WORKER_MEMORY: 2g
+    depends_on: [spark-master]
+    deploy:
+      mode: replicated
+      replicas: 2
+    networks: [spark]
+
+  submit:
+    image: apache/spark:4.2.0-python3
+    command: sleep infinity
+    user: root
+    depends_on: ["spark-master", "minio"]
+    volumes:
+      - ./job_revenue.py:/opt/app/job_revenue.py:ro
+      - ./submit.sh:/opt/app/submit.sh:ro
+      - ivy_cache:/opt/ivy
+    networks: [spark]
+
+volumes:
+  minio_data:
+    external: true
+    name: minio_minio_data
+  ivy_cache:
+
+networks:
+  spark:
