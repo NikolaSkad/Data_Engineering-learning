@@ -8,5 +8,5 @@ Posle novog `.venv`-a ili reinstalacije pyspark-a link se ponovo pravi iz korena
 
 ```bash
 PYS=.venv/lib/python3.14/site-packages/pyspark
-rm -rf $PYS/conf && ln -s "$PWD/zoomcamp/spark-conf" $PYS/conf
+rm -rf $PYS/conf && ln -s "$PWD/zoomcamp/06_batch/spark-conf" $PYS/conf
 ```

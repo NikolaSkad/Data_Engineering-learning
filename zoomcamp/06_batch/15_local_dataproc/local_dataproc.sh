@@ -20,8 +20,8 @@
 set -euo pipefail
 
 LESSON_DIR="$(cd "$(dirname "$0")" && pwd)"
-ZOOMCAMP_DIR="$(dirname "$LESSON_DIR")"
-REPO_DIR="$(dirname "$ZOOMCAMP_DIR")"
+ZOOMCAMP_DIR="$(dirname "$LESSON_DIR")" # zoomcamp/06_batch
+REPO_DIR="$(dirname "$(dirname "$ZOOMCAMP_DIR")")"
 
 export JAVA_HOME="${JAVA_HOME:-$(/usr/libexec/java_home -v 17)}"
 export SPARK_HOME="$REPO_DIR/.venv/lib/python3.14/site-packages/pyspark"

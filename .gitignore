@@ -6,7 +6,7 @@ target/
 .project
 .classpath
 .factorypath
-zoomcamp/data/
+zoomcamp/06_batch/data/
 .ipynb_checkpoints/
 .virtual_documents/
 
@@ -17,4 +17,4 @@ zoomcamp/data/
 *.crc
 _SUCCESS
 
-zoomcamp/provezbavanje/*.md
+zoomcamp/06_batch/provezbavanje/*.md

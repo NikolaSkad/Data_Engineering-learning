@@ -13,7 +13,7 @@ echo $SPARK_HOME
 ls $SPARK_HOME/sbin
 
 # MinIO
-docker compose -f zoomcamp/minio/docker-compose.yml up -d
+docker compose -f zoomcamp/06_batch/minio/docker-compose.yml up -d
 
 # pokretanje Spark master-a
 $SPARK_HOME/sbin/spark-daemon.sh start org.apache.spark.deploy.master.Master 1 --host localhost --port 7077 --webui-port 8080
@@ -23,7 +23,7 @@ $SPARK_HOME/sbin/spark-daemon.sh start org.apache.spark.deploy.worker.Worker 1 s
 # kreiranje S3 bucket-a pomocu minio-a
 aws s3api create-bucket --bucket nyc-tlc --profile minio
 # slanje lokalnih parquet fajlova u bucket (sync salje samo ono sto fali ili se promenilo)
-aws s3 sync zoomcamp/data/pq/ s3://nyc-tlc/pq --profile minio
+aws s3 sync zoomcamp/06_batch/data/pq/ s3://nyc-tlc/pq --profile minio
 
 # slanje job-a na klaster
 # --master, --packages i --conf idu u komandu, a ne u kod: skripta opisuje STA radi (citaj, spoji, saberi, upisi),
@@ -57,7 +57,7 @@ spark-submit \
     --conf spark.hadoop.fs.s3a.secret.key=minioadmin \
     --conf spark.hadoop.fs.s3a.path.style.access=true \
     --conf spark.hadoop.fs.s3a.connection.ssl.enabled=false \
-    zoomcamp/provezbavanje/job_revenue.py \
+    zoomcamp/06_batch/provezbavanje/job_revenue.py \
         --input-green=s3a://nyc-tlc/pq/green/2020/ \
         --input-yellow=s3a://nyc-tlc/pq/yellow/2020/ \
         --output=s3a://nyc-tlc/report-2020
@@ -68,4 +68,4 @@ aws s3 ls s3://nyc-tlc/report-2020/ --profile minio
 $SPARK_HOME/sbin/spark-daemon.sh stop org.apache.spark.deploy.worker.Worker 1
 $SPARK_HOME/sbin/spark-daemon.sh stop org.apache.spark.deploy.master.Master 1
 
-docker compose -f zoomcamp/minio/docker-compose.yml down
+docker compose -f zoomcamp/06_batch/minio/docker-compose.yml down
