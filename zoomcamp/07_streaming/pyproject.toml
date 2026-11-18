@@ -1,0 +1,31 @@
+[project]
+name = "07-streaming"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "Nikola Skadric", email = "nikolaskadric.ns@gmail.com" }
+]
+requires-python = ">=3.12"
+dependencies = [
+    "kafka-python>=3.0.13",
+    "pandas>=3.1.1",
+    "pyarrow>=26.0.1",
+]
+
+[project.scripts]
+07-streaming = "07_streaming:main"
+
+[build-system]
+requires = ["uv_build>=0.12.15,<0.13.0"]
+build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+    "jupyter>=1.1.1",
+]
+
+# Ruff: zajednička pravila iz korena, ali za Python 3.12 (ovaj projekat)
+[tool.ruff]
+extend = "../../ruff.toml"
+target-version = "py312"
