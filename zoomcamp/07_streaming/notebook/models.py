@@ -2,6 +2,9 @@ import dataclasses
 import json
 from dataclasses import dataclass
 
+server = "localhost:9092"
+topic_name = "rides"
+
 
 @dataclass
 class Ride:
